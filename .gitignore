@@ -1,0 +1,12 @@
+
+# Secrets
+
+.env
+.pgpass
+.pg_service.conf
+
+
+# Storage files
+
+*.csv
+*.gz
