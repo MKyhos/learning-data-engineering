@@ -36,52 +36,7 @@ echo ""
 echo "### Prepare Postgres"
 echo ""
 
-echo "Starting container"
-
-docker volume create pg-nyc-vol
-docker pull postgres:latest
-docker run \
-  --detach \
-  --name pg-nyc \
-  -p "${DB_PORT}:5432" \
-  -e POSTGRES_PASSWORD="${DB_PASSWORD}" \
-  -e POSTGRES_USER="${DB_USER}" \
-  -e POSTGRES_DB="${DB_NAME}" \
-  -v pg-nyc-vol:/var/lib/postgresql/data \
-  postgres:latest
-
-
-
-echo "Downloading Trip data..."
-trip_file="green_tripdata_2019-01.csv"
-
-wget -nc \
-  -P data \
-  "https://github.com/DataTalksClub/nyc-tlc-data/releases/download/green/${trip_file}.gz"
-
-[ ! -f "./data/${trip_file}" ] \
-  && gzip -d --keep "data/${trip_file}.gz"
-
-echo "Downloading zone data..."
-zone_file="taxi+_zone_lookup.csv"
-
-wget -nc \
-  -P data \
-  "https://s3.amazonaws.com/nyc-tlc/misc/${zone_file}"
-
-echo "Inserting data into database..."
-
-# waiting for the container to be up and ready :))
-sleep 5
-
-echo " - Setting up schema..."
-psql service=nyc -f weeks/01_prerequisites/db_schema_01.sql
-echo " - Inserting table taxi_zone..."
-psql service=nyc -c "\copy taxi_zone FROM './data/${zone_file}' DELIMITER ',' CSV HEADER"
-echo " - Inserting table taxi_trip..."
-psql service=nyc -c "\copy taxi_trip FROM './data/${trip_file}' DELIMITER ',' CSV HEADER"
-
-echo " - Database prepared :)"
+bash ./docker_solution.sh
 
 echo ""
 echo "Question 3"
@@ -124,7 +79,6 @@ SQL
 echo ""
 echo "## Question 6"
 echo "Largest tip"
-echo ""
 
 psql service=nyc <<SQL
 SELECT loc_pu.zone AS pu_zone, loc_do.zone AS do_zeon, tip_amount

@@ -2,6 +2,7 @@
 # Secrets
 
 .env
+env.list
 .pgpass
 .pg_service.conf
 
